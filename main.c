@@ -6,7 +6,7 @@ static size_t read_size(const char *prompt) {
     long long v;
     for (;;) {
         printf("%s", prompt);
-        if (scanf("%lf", &v) == 1 && v > 0) return (size_t)v;
+        if (scanf("%lld", &v) == 1 && v > 0) return (size_t)v;
         fprintf(stderr, "Entrez un entier positif.\n");
         int c; while ((c = getchar()) != '\n' && c != EOF); {/* vider */}
     }
@@ -51,7 +51,7 @@ int main (void) {
         return EXIT_FAILURE;
     }
 
-    printf("La matrice C = A * B de dimensions (%zu x &zu):\n", C->rows, C->cols);
+    printf("La matrice C = A * B de dimensions (%zu x %zu):\n", C->rows, C->cols);
     mat_print(C);
 
     mat_free(A);
