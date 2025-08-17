@@ -17,7 +17,7 @@ static int menu(void) {
     int choix;
     printf("\n=== MENU MATRICES ===\n");
     printf("1. Multiplication de deux matrices 2D\n");
-    printf("2. Multiplication de deux matrices 3D (a venir)\n");
+    printf("2. Multiplication de deux matrices multidimensionelles (a venir)\n");
     printf("3. Inversion de matrice (a venir)\n");
     printf("4. Rotation de matrice (a venir)\n");
     printf("0. Quitter\n");
@@ -73,6 +73,18 @@ static void do_matrix_multiplication(void) {
     mat_free(C);
 }
 
+static void do_matrix_multidim(void) {
+    printf("WIP\n");
+}
+
+static void do_matrix_inversion(void) {
+    printf("WIP\n");
+}
+
+static void do_matrix_rotation(void) {
+    printf("WIP\n");
+}
+
 // ---- point d'entrée ----
 int main(void) {
     for (;;) {
@@ -83,6 +95,15 @@ int main(void) {
         }
         else if (choix == 1) {
             do_matrix_multiplication();
+        }
+        else if (choix == 2) {
+            do_matrix_multidim();
+        }
+        else if (choix == 3) {
+            do_matrix_inversion();
+        }
+        else if (choix == 4) {
+            do_matrix_rotation();
         }
         else {
             printf("Choix invalide.\n");
