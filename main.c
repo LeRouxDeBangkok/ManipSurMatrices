@@ -1,6 +1,7 @@
 #include "matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 // ---- utilitaires ----
 static size_t read_size(const char *prompt) {
@@ -78,8 +79,79 @@ static void do_matrix_multidim(void) {
 }
 
 static void do_matrix_inversion(void) {
-    printf("WIP\n");
+    size_t n = read_size("Taille de la matrice carree A (n): ");
+
+    Matrix *A = mat_create(n, n);
+    printf("Entrez les %zu x %zu valeurs de la matrice A:\n", n, n);
+    if (!mat_read(A)) {
+        fprintf(stderr, "Erreur de lecture\n");
+        mat_free(A);
+        return;
+    }
+    Matrix *aug = mat_create(n, 2*n);
+
+    for (size_t i =0; i < n; i++) {
+        for (size_t j = 0; j < n; j++) {
+            mat_set(aug, i, j, mat_get(A, i, j));
+        }
+        for (size_t j = 0; j < n; j++) {
+            mat_set(aug, i, n+j, (i == j) ? 1.0 : 0.0);
+        }
+    }
+
+    for (size_t k = 0; k < n; k++) {
+        size_t pivot_row = k;
+        double max_val = fabs(mat_get(aug, k, k));
+        for (size_t i = k + 1; i < n; i++) {
+            double val = fabs(mat_get(aug, i, k));
+            if (val > max_val) {
+                max_val = val;
+                pivot_row = i;
+            }
+        }
+        if (max_val == 0.0) {
+            fprintf(stderr, "Matrice non inversible\n");
+            mat_free(A);
+            mat_free(aug);
+            return;
+        }
+        if (pivot_row != k) {
+            for (size_t j = 0; j < 2*n; j++) {
+                double tmp = mat_get(aug, k, j);
+                mat_set(aug, k, j, mat_get(aug, pivot_row, j));
+                mat_set(aug, pivot_row, j, tmp);
+            }
+        }
+        double pivot = mat_get(aug, k, k);
+        for (size_t j =0; j<2*n; j++) {
+            double val = mat_get(aug, k, j) / pivot;
+            mat_set(aug, k, j, val);
+        }
+        for (size_t i = 0; i < n; i++) {
+            if (i == k) continue;
+            double factor = mat_get(aug, i, k);
+            for (size_t j =0; j < 2*n; j++) {
+                double val = mat_get(aug, i, j) - factor * mat_get(aug, k, j);
+                mat_set(aug, i, j, val);
+            }
+        }
+    }
+
+    Matrix *inv = mat_create(n, n);
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = 0; j < n; j++) {
+            mat_set(inv, i, j, mat_get(aug, i, n+j));
+        }
+    }
+
+    printf("Inverse de A (%zu x %zu)\n", n, n);
+    mat_print(inv);
+
+    mat_free(A);
+    mat_free(aug);
+    mat_free(inv);
 }
+
 
 static void do_matrix_rotation(void) {
     printf("WIP\n");
