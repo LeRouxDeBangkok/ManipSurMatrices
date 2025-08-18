@@ -19,7 +19,7 @@ static int menu(void) {
     printf("\n=== MENU MATRICES ===\n");
     printf("1. Multiplication de deux matrices 2D\n");
     printf("2. Multiplication de deux matrices multidimensionelles (a venir)\n");
-    printf("3. Inversion de matrice (a venir)\n");
+    printf("3. Inversion de matrice\n");
     printf("4. Rotation de matrice (a venir)\n");
     printf("0. Quitter\n");
     printf("Votre choix: ");
