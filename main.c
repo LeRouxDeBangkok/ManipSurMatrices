@@ -88,7 +88,7 @@ static void do_matrix_inversion(void) {
         mat_free(A);
         return;
     }
-    
+
     Matrix *aug = mat_create(n, 2*n);
 
     for (size_t i =0; i < n; i++) {
