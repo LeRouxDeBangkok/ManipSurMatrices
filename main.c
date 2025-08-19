@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "matrix3d.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -18,9 +19,9 @@ static int menu(void) {
     int choix;
     printf("\n=== MENU MATRICES ===\n");
     printf("1. Multiplication de deux matrices 2D\n");
-    printf("2. Multiplication de deux matrices multidimensionelles (a venir)\n");
+    printf("2. Rotation de matrice\n");
     printf("3. Inversion de matrice\n");
-    printf("4. Rotation de matrice (a venir)\n");
+    printf("4. Multiplication de deux matrices 3D\n");
     printf("0. Quitter\n");
     printf("Votre choix: ");
     if (scanf("%d", &choix) != 1) {
@@ -75,7 +76,72 @@ static void do_matrix_multiplication(void) {
 }
 
 static void do_matrix_multidim(void) {
-    printf("WIP\n");
+    size_t depth = read_size("Profondeur (nb de matrices 2D): ");
+    size_t a_rows = read_size("A lignes: ");
+    size_t a_cols = read_size("A colonnes: ");
+    size_t b_rows = read_size("B lignes: ");
+    size_t b_cols = read_size("B colonnes: ");
+
+    if (a_cols != b_rows) {
+        fprintf(stderr, "Dimensions incompatibles\n");
+        return;
+    }
+
+    Matrix3D *A = mat3d_create(depth, a_rows, a_cols);
+    Matrix3D *B = mat3d_create(depth, b_rows, b_cols);
+
+    for (size_t k = 0; k < depth; k++) {
+        printf("Tranche %zu de A (%zu x %zu):\n", k, a_rows, a_cols);
+        for (size_t i =0; i < a_rows; i++) {
+            for (size_t j = 0; j < a_cols; j++) {
+                double v;
+                if (scanf("%lf", &v) != 1) {
+                    fprintf(stderr, "Erreur lecture\n");
+                    mat3d_free(A);
+                    mat3d_free(B);
+                    return;
+                }
+                mat3d_set(A, k, i, j, v);
+            }
+        }
+    }
+    for (size_t k = 0; k < depth; k++) {
+        printf("Tranche %zu de B (%zu x %zu):\n", k, b_rows, b_cols);
+        for (size_t i = 0; i < b_rows; i++) {
+            for (size_t j = 0; j < b_cols; j++) {
+                double v;
+                if (scanf("%lf", &v) != 1) {
+                    fprintf(stderr, "Erreur lecture\n");
+                    mat3d_free(A);
+                    mat3d_free(B);
+                    return;
+                }
+                mat3d_set(B, k, i, j, v);
+            }
+        }
+    }
+
+    Matrix3D *C = mat3d_mul(A, B);
+    if (!C) {
+        fprintf(stderr, "Erreur de multiplication\n");
+        mat3d_free(A);
+        mat3d_free(B);
+        return;
+    }
+
+    for (size_t k = 0; k < depth; k++) {
+        printf("Tranche %zu de C (%zu x %zu):\n", k, C->rows, C->cols);
+        for (size_t i = 0; i < C->rows; i++) {
+            for (size_t j = 0; j < C->cols; j++) {
+                printf("%8.3f ", mat3d_get(C, k, i, j));
+            }
+            printf("\n");
+        }
+    }
+
+    mat3d_free(A);
+    mat3d_free(B);
+    mat3d_free(C);
 }
 
 static void do_matrix_inversion(void) {
@@ -155,7 +221,53 @@ static void do_matrix_inversion(void) {
 
 
 static void do_matrix_rotation(void) {
-    printf("WIP\n");
+    size_t n = read_size("Taille de la matrice carree A (n): ");
+    Matrix *A = mat_create(n, n);
+    printf("Entrez les %zu x %zu valeurs de la matrice A:\n", n, n);
+    if (!mat_read(A)) {
+        fprintf(stderr, "Erreur de lecture\n");
+        mat_free(A);
+        return;
+    }
+
+    int angle;
+    printf("Angle de rotation (90, 180, 270): ");
+    if (scanf("%d", &angle) != 1) {
+        fprintf(stderr, "Lecture angle echouee\n");
+        mat_free(A);
+        return;
+    }
+
+    Matrix *R = mat_create(n, n);
+    if (angle == 90) {
+        for (size_t i = 0; i < n; i++) {
+            for (size_t j = 0; j < n; j++) {
+                mat_set(R, i, j, mat_get(A, n - j - 1, i));
+            }
+        }
+    } else if (angle == 180) {
+        for (size_t i = 0; i < n; i++) {
+            for (size_t j = 0; j < n; j++) {
+                mat_set(R, i, j, mat_get(A, n - i - 1, n - j - 1));
+            }
+        }
+    } else if (angle == 270) {
+        for (size_t i = 0; i < n; i++) {
+            for (size_t j = 0; j < n; j++) {
+                mat_set(R, i, j, mat_get(A, j, n - i - 1));
+            }
+        }
+    } else {
+        fprintf(stderr, "Angle non pris en charge\n");
+        mat_free(A);
+        mat_free(R);
+        return;
+    }
+
+    printf("Matrice A tournee de %d degrees\n", angle);
+    mat_print(R);
+    mat_free(A);
+    mat_free(R);
 }
 
 // ---- point d'entrée ----
@@ -170,13 +282,13 @@ int main(void) {
             do_matrix_multiplication();
         }
         else if (choix == 2) {
-            do_matrix_multidim();
+            do_matrix_rotation();
         }
         else if (choix == 3) {
             do_matrix_inversion();
         }
         else if (choix == 4) {
-            do_matrix_rotation();
+            do_matrix_multidim();
         }
         else {
             printf("Choix invalide.\n");

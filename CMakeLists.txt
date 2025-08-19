@@ -4,4 +4,6 @@ set(CMAKE_C_STANDARD 11)
 add_executable(ManipSurMatrices
         main.c
         matrix.c
-        matrix.h)
+        matrix.h
+        matrix3d.h
+        matrix3d.c)
